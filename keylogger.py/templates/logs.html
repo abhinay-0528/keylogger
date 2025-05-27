@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="refresh" content="10"> <!-- Refresh every 10 seconds -->
+    <title>Decrypted Logs - Cybersecurity Research</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header .subtitle {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+        }
+
+        .refresh-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #e8f4fd;
+            color: #2980b9;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .refresh-dot {
+            width: 8px;
+            height: 8px;
+            background: #2980b9;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            border-left: 4px solid #3498db;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .logs-section {
+            background: #2c3e50;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .logs-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #34495e;
+        }
+
+        .logs-title {
+            color: #ecf0f1;
+            font-size: 1.3rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logs-timestamp {
+            color: #95a5a6;
+            font-size: 0.9rem;
+        }
+
+        .logs-content {
+            background: #1e1e1e;
+            border-radius: 8px;
+            padding: 25px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #00ff00;
+            max-height: 500px;
+            overflow-y: auto;
+            border: 1px solid #34495e;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .logs-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .logs-content::-webkit-scrollbar-track {
+            background: #2c3e50;
+            border-radius: 4px;
+        }
+
+        .logs-content::-webkit-scrollbar-thumb {
+            background: #34495e;
+            border-radius: 4px;
+        }
+
+        .logs-content::-webkit-scrollbar-thumb:hover {
+            background: #4a6741;
+        }
+
+        .empty-logs {
+            text-align: center;
+            color: #95a5a6;
+            font-style: italic;
+            padding: 40px;
+        }
+
+        .actions-section {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+
+        .action-button {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .action-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.4);
+        }
+
+        .action-button.back {
+            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+            box-shadow: 0 4px 15px rgba(149, 165, 166, 0.3);
+        }
+
+        .action-button.back:hover {
+            box-shadow: 0 8px 25px rgba(149, 165, 166, 0.4);
+        }
+
+        .action-button.download {
+            background: linear-gradient(135deg, #27ae60, #229954);
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+        }
+
+        .action-button.download:hover {
+            box-shadow: 0 8px 25px rgba(39, 174, 96, 0.4);
+        }
+
+        .action-button.clear {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+        }
+
+        .action-button.clear:hover {
+            box-shadow: 0 8px 25px rgba(231, 76, 60, 0.4);
+        }
+
+        .warning {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+        }
+
+        .warning-icon {
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 2px 0;
+        }
+
+        .log-entry.special-key {
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+
+        .log-entry.normal-key {
+            color: #00ff00;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .stats-section {
+                grid-template-columns: 1fr;
+            }
+
+            .actions-section {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .action-button {
+                width: 100%;
+                max-width: 300px;
+                justify-content: center;
+            }
+
+            .logs-content {
+                font-size: 0.85rem;
+                padding: 20px;
+            }
+        }
+
+        .live-indicator {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #27ae60;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .live-dot {
+            width: 6px;
+            height: 6px;
+            background: white;
+            border-radius: 50%;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="live-indicator">
+            <div class="live-dot"></div>
+            LIVE
+        </div>
+
+        <div class="header">
+            <h1>🔓 Decrypted Key Logs</h1>
+            <p class="subtitle">Real-time Keystroke Analysis Dashboard</p>
+            <div class="refresh-indicator">
+                <div class="refresh-dot"></div>
+                Auto-refresh every 10 seconds
+            </div>
+        </div>
+
+        <div class="stats-section">
+            <div class="stat-card">
+                <div class="stat-number" id="total-keys">0</div>
+                <div class="stat-label">Total Keystrokes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="special-keys">0</div>
+                <div class="stat-label">Special Keys</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="session-time">--:--</div>
+                <div class="stat-label">Session Duration</div>
+            </div>
+        </div>
+
+        <div class="logs-section">
+            <div class="logs-header">
+                <div class="logs-title">
+                    📊 Keystroke Data
+                </div>
+                <div class="logs-timestamp" id="last-updated">
+                    Last updated: <span id="timestamp">{{ timestamp or 'Never' }}</span>
+                </div>
+            </div>
+            
+            <div class="logs-content" id="logs-display">
+                {% if logs and logs.strip() %}
+                    {{ logs }}
+                {% else %}
+                    <div class="empty-logs">
+                        📝 No keystroke data available yet.<br>
+                        Start logging from the main interface to see data here.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="actions-section">
+            <a href="/" class="action-button back">
+                ← Back to Dashboard
+            </a>
+            <a href="/download-log" class="action-button download">
+                📥 Download Raw Log
+            </a>
+            <a href="/clear-logs" class="action-button clear">
+                🗑️ Clear Logs
+            </a>
+        </div>
+
+        <div class="warning">
+            <div class="warning-icon">⚠️</div>
+            <div>
+                <strong>Privacy Notice:</strong> This data contains sensitive keystroke information. 
+                Ensure proper handling and disposal according to your organization's security policies.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function formatLogData(logs) {
+            if (!logs || !logs.trim()) return '';
+            
+            return logs.split('').map(char => {
+                if (char.match(/^\[.*\]$/)) {
+                    return `<span class="log-entry special-key">${char}</span>`;
+                } else {
+                    return `<span class="log-entry normal-key">${char}</span>`;
+                }
+            }).join('');
+        }
+
+        function updateStats() {
+            const logsContent = document.getElementById('logs-display').textContent || '';
+            const totalKeys = logsContent.length;
+            const specialKeys = (logsContent.match(/\[.*?\]/g) || []).length;
+            
+            document.getElementById('total-keys').textContent = totalKeys;
+            document.getElementById('special-keys').textContent = specialKeys;
+        }
+
+        function updateTimestamp() {
+            const now = new Date();
+            document.getElementById('timestamp').textContent = now.toLocaleTimeString();
+        }
+
+        function updateSessionTime() {
+            const startTime = sessionStorage.getItem('sessionStart') || Date.now();
+            if (!sessionStorage.getItem('sessionStart')) {
+                sessionStorage.setItem('sessionStart', Date.now());
+            }
+            
+            const elapsed = Date.now() - parseInt(startTime);
+            const minutes = Math.floor(elapsed / 60000);
+            const seconds = Math.floor((elapsed % 60000) / 1000);
+            
+            document.getElementById('session-time').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // Auto-scroll to bottom of logs
+        function scrollToBottom() {
+            const logsContent = document.getElementById('logs-display');
+            logsContent.scrollTop = logsContent.scrollHeight;
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            const logsDisplay = document.getElementById('logs-display');
+            const rawLogs = logsDisplay.textContent;
+            
+            if (rawLogs && rawLogs.trim() && !rawLogs.includes('No keystroke data')) {
+                logsDisplay.innerHTML = formatLogData(rawLogs);
+                scrollToBottom();
+            }
+            
+            updateStats();
+            updateTimestamp();
+            updateSessionTime();
+            
+            // Update session time every second
+            setInterval(updateSessionTime, 1000);
+            
+            // Show refresh countdown
+            let countdown = 10;
+            const refreshDot = document.querySelector('.refresh-dot');
+            
+            setInterval(() => {
+                countdown--;
+                if (countdown <= 0) {
+                    countdown = 10;
+                    updateTimestamp();
+                }
+                
+                // Faster pulse when close to refresh
+                if (countdown <= 3) {
+                    refreshDot.style.animationDuration = '0.5s';
+                } else {
+                    refreshDot.style.animationDuration = '2s';
+                }
+            }, 1000);
+        });
+
+        // Handle page visibility for better performance
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                // Page is hidden, could pause some updates
+            } else {
+                // Page is visible, resume updates
+                updateTimestamp();
+                updateStats();
+            }
+        });
+    </script>
+</body>
+</html>

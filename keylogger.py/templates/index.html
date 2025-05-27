@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Keylogger UI</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔒 Cybersecurity Research Interface</h1>
+            <p class="subtitle">Educational Keystroke Analysis Tool</p>
+        </div>
+
+        <div class="status-section">
+            <div class="status-card" id="logging-status">
+                <div class="status-title">
+                    <div class="status-dot" id="logging-dot"></div>
+                    Logging Status
+                </div>
+                <div class="status-value" id="logging-text">Inactive</div>
+            </div>
+            <div class="status-card" id="encryption-status">
+                <div class="status-title">
+                    <div class="status-dot" id="encryption-dot"></div>
+                    Encryption Status
+                </div>
+                <div class="status-value" id="encryption-text">Not Encrypted</div>
+            </div>
+            <div class="status-card">
+                <div class="status-title">
+                    <div class="status-dot"></div>
+                    Session Info
+                </div>
+                <div class="status-value" id="session-info">Ready to start</div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <a href="/start" class="action-button start" id="start-btn">
+                ▶️ Start Logging
+            </a>
+            <a href="/stop" class="action-button stop" id="stop-btn" style="display: none;">
+                ⏹️ Stop Logging
+            </a>
+            <a href="/encrypt" class="action-button encrypt" id="encrypt-btn">
+                🔐 Encrypt Data
+            </a>
+            <a href="/download-log" class="action-button download" id="download-log-btn">
+                📥 Download Log
+            </a>
+            <a href="/download-key" class="action-button download" id="download-key-btn">
+                🔑 Download Key
+            </a>
+            <a href="/decrypt" class="action-button decrypt" id="decrypt-btn">Decrypt Log</a>
+
+        </div>
+
+        <div class="info-section">
+            <h3>📚 Educational Features</h3>
+            <div class="features-list">
+                <div class="feature-item">
+                    <strong>Keystroke Capture</strong>
+                    Monitor and log keyboard input for analysis
+                </div>
+                <div class="feature-item">
+                    <strong>Encryption Support</strong>
+                    Secure logged data with Fernet encryption
+                </div>
+                <div class="feature-item">
+                    <strong>Export Capabilities</strong>
+                    Download logs and encryption keys
+                </div>
+                <div class="feature-item">
+                    <strong>Real-time Status</strong>
+                    Monitor system status and activity
+                </div>
+            </div>
+            <p>This interface demonstrates cybersecurity concepts including keystroke logging, data encryption, and secure file handling in a controlled educational environment.</p>
+        </div>
+
+        <div class="warning">
+            <div class="warning-icon">⚠️</div>
+            <div class="warning-text">
+                <strong>Legal Notice & Educational Use Only</strong>
+                This tool is strictly for educational and authorized testing purposes. Unauthorized keystroke logging violates privacy laws and computer fraud statutes. Always obtain explicit written consent before monitoring any system. Use only on systems you own or have explicit permission to test.
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script>
+        let isLogging = false;
+        let isEncrypted = false;
+
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type} show`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        function updateLoggingStatus(active) {
+            const statusCard = document.getElementById('logging-status');
+            const statusDot = document.getElementById('logging-dot');
+            const statusText = document.getElementById('logging-text');
+            const startBtn = document.getElementById('start-btn');
+            const stopBtn = document.getElementById('stop-btn');
+            
+            if (active) {
+                statusCard.classList.add('active');
+                statusDot.classList.add('active');
+                statusText.textContent = 'Active - Recording keystrokes';
+                startBtn.style.display = 'none';
+                stopBtn.style.display = 'inline-flex';
+                document.getElementById('session-info').textContent = `Started: ${new Date().toLocaleTimeString()}`;
+            } else {
+                statusCard.classList.remove('active');
+                statusDot.classList.remove('active');
+                statusText.textContent = 'Inactive';
+                startBtn.style.display = 'inline-flex';
+                stopBtn.style.display = 'none';
+                document.getElementById('session-info').textContent = 'Ready to start';
+            }
+            isLogging = active;
+        }
+
+        function updateEncryptionStatus(encrypted) {
+            const statusCard = document.getElementById('encryption-status');
+            const statusDot = document.getElementById('encryption-dot');
+            const statusText = document.getElementById('encryption-text');
+            
+            if (encrypted) {
+                statusCard.classList.add('encrypted');
+                statusDot.classList.add('encrypted');
+                statusText.textContent = 'Data encrypted and secured';
+            } else {
+                statusCard.classList.remove('encrypted');
+                statusDot.classList.remove('encrypted');
+                statusText.textContent = 'Not encrypted';
+            }
+            isEncrypted = encrypted;
+        }
+
+        // Add click handlers
+        document.getElementById('start-btn').addEventListener('click', function(e) {
+            e.preventDefault();
+            this.innerHTML = '<div class="loading-spinner"></div> Starting...';
+            
+            fetch('/start')
+                .then(() => {
+                    updateLoggingStatus(true);
+                    showNotification('Keystroke logging started successfully');
+                })
+                .catch(() => {
+                    showNotification('Failed to start logging', 'error');
+                })
+                .finally(() => {
+                    this.innerHTML = '▶️ Start Logging';
+                });
+        });
+
+        document.getElementById('stop-btn').addEventListener('click', function(e) {
+            e.preventDefault();
+            updateLoggingStatus(false);
+            showNotification('Keystroke logging stopped');
+        });
+
+        document.getElementById('encrypt-btn').addEventListener('click', function(e) {
+            e.preventDefault();
+            this.innerHTML = '<div class="loading-spinner"></div> Encrypting...';
+            
+            fetch('/encrypt')
+                .then(() => {
+                    updateEncryptionStatus(true);
+                    showNotification('Log data encrypted successfully');
+                })
+                .catch(() => {
+                    showNotification('Failed to encrypt data', 'error');
+                })
+                .finally(() => {
+                    this.innerHTML = '🔐 Encrypt Data';
+                });
+        });
+
+        document.getElementById('download-log-btn').addEventListener('click', function() {
+            showNotification('Downloading log file...');
+        });
+
+        document.getElementById('download-key-btn').addEventListener('click', function() {
+            showNotification('Downloading encryption key...');
+        });
+
+        document.getElementById('decrypt-btn').addEventListener('click', function(e) {
+            // Do NOT call preventDefault here — let it navigate
+            showNotification('Decrypting log data...');
+        });
+
+
+
+
+        // Add ripple effect to buttons
+        document.querySelectorAll('.action-button').forEach(button => {
+            button.addEventListener('click', function(e) {
+                const ripple = document.createElement('span');
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+                
+                ripple.style.cssText = `
+                    position: absolute;
+                    width: ${size}px;
+                    height: ${size}px;
+                    left: ${x}px;
+                    top: ${y}px;
+                    background: rgba(255,255,255,0.3);
+                    border-radius: 50%;
+                    transform: scale(0);
+                    animation: ripple 0.6s linear;
+                    pointer-events: none;
+                `;
+                
+                this.appendChild(ripple);
+                setTimeout(() => ripple.remove(), 600);
+            });
+        });
+
+        // Add CSS for ripple animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: scale(4);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Initialize status on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateLoggingStatus(false);
+            updateEncryptionStatus(false);
+        });
+    </script>
+  </body>
+</html>
